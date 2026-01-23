@@ -8,8 +8,8 @@ int main() {
     TipoPadrao padrao = "ABRA";
 
     // 2. Cálculo do tamanho (n para o texto, m para o padrão)
-    long int n = strlen(texto);
-    long int m = strlen(padrao);
+    long n = strlen(texto);
+    long m = strlen(padrao);
 
     printf("Buscando '%s' em '%s'...\n", padrao, texto);
     printf("----------------------------------\n");
