@@ -10,5 +10,7 @@ typedef char TipoTexto[MAXTAMTEXTO];
 typedef char TipoPadrao[MAXTAMPADRAO];
 
 void forcaBruta(TipoTexto T, long int n, TipoPadrao P, long int m);
+void BMH(TipoTexto T, long n, TipoPadrao P, long m);
+void BMH_debug(TipoTexto T, long n, TipoPadrao P, long m);
 
 #endif
