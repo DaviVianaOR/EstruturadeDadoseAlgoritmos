@@ -6,12 +6,15 @@
 
 // Função auxiliar para imprimir o vetor em uma única linha dentro da tabela
 // Imprime o vetor respeitando a lacuna no índice 1 se necessário
+#include <stdio.h>
+#include "utils.h"
+
 void imprimirLinhaVetor(int A[], int n, int vazioNoUm) {
     printf("[");
     for (int i = 1; i <= n; i++) {
-        if (vazioNoUm && i == 1) printf("  ");
-        else printf("%2d", A[i]);
-        if (i < n) printf(",");
+        if (vazioNoUm && i == 1) printf(" / ");
+        else printf("%2d ", A[i]);
+        if (i < n) printf("|");
     }
     printf("]");
 }
@@ -20,97 +23,92 @@ void PrimeiraFase(int A[], int n) {
     int Raiz = n;
     int Folha = n;
     int Prox;
-    int valor_filho;
+    char etapa = 'a';
 
-    printf("\n>>> RASTREAMENTO DETALHADO FASE 1: REDUCAO\n");
-    printf("+------+------+----------+-------+-------+----------------------+\n");
-    printf("| Etapa| Prox | V. Filho | Raiz  | Folha | Vetor A              |\n");
-    printf("+------+------+----------+-------+-------+----------------------+\n");
+    printf("\n>>> FASE 1: REDUCAO (SEGUINDO LOGICA DA IMAGEM)\n");
+    printf("Etapa | %-25s | Prox | Raiz | Folha\n", "Vetor A");
+    printf("--------------------------------------------------------------\n");
     
-    // Etapa 0: Estado Inicial
-    printf("|   0  |  --  |    --    | %5d | %5d | ", Raiz, Folha);
+    // a) Estado Inicial
+    printf("  %c)  | ", etapa++);
     imprimirLinhaVetor(A, n, 0);
-    printf(" |\n");
+    printf(" | %4d | %4d | %4d\n", n, Raiz, Folha);
 
-    int etapa = 1;
     for (Prox = n; Prox >= 2; Prox--) {
-        /* SELEÇÃO DO PRIMEIRO FILHO */
+        // Seleção do 1º Filho
         if ((Folha < 1) || ((Raiz > Prox) && (A[Raiz] <= A[Folha]))) {
-            valor_filho = A[Raiz]; // Valor do nó interno
-            A[Prox] = A[Raiz];
-            A[Raiz] = Prox;
-            Raiz--;
+            A[Prox] = A[Raiz]; A[Raiz] = Prox; Raiz--;
         } else {
-            valor_filho = A[Folha]; // Valor da folha
-            A[Prox] = A[Folha];
-            Folha--;
+            A[Prox] = A[Folha]; Folha--;
         }
-        
-        printf("| %4d | %4d | %8d | %5d | %5d | ", etapa++, Prox, valor_filho, Raiz, Folha);
+        printf("  %c)  | ", etapa++);
         imprimirLinhaVetor(A, n, 0);
-        printf(" |\n");
+        printf(" | %4d | %4d | %4d\n", Prox, Raiz, Folha);
 
-        /* SELEÇÃO E SOMA DO SEGUNDO FILHO */
+        // Seleção do 2º Filho
         if ((Folha < 1) || ((Raiz > Prox) && (A[Raiz] <= A[Folha]))) {
-            valor_filho = A[Raiz];
-            A[Prox] += A[Raiz];
-            A[Raiz] = Prox;
-            Raiz--;
+            A[Prox] += A[Raiz]; A[Raiz] = Prox; Raiz--;
         } else {
-            valor_filho = A[Folha];
-            A[Prox] += A[Folha];
-            Folha--;
+            A[Prox] += A[Folha]; Folha--;
         }
-
-        printf("| %4d | %4d | %8d | %5d | %5d | ", etapa++, Prox, valor_filho, Raiz, Folha);
+        printf("  %c)  | ", etapa++);
         imprimirLinhaVetor(A, n, 0);
-        printf(" |\n");
+        printf(" | %4d | %4d | %4d\n", Prox, Raiz, Folha);
     }
-    printf("+------+------+----------+-------+-------+----------------------+\n");
+    
+    // k) Transição final: A[1] torna-se vazio para Fase 2
+    printf("  %c)  | ", etapa);
+    imprimirLinhaVetor(A, n, 1);
+    printf(" | %4d | %4d | %4d\n", 1, Raiz, Folha);
 }
 
 void SegundaFase(int A[], int n) {
-    printf("\n>>> RASTREAMENTO FASE 2: NIVEIS (A[1] VAZIO)\n");
-    printf("+-------+----------------------+\n");
-    printf("| Prox  | Vetor A              |\n");
-    printf("+-------+----------------------+\n");
-
+    printf("\n>>> FASE 2: NIVEIS (A[1] VAZIO)\n");
     A[2] = 0; 
-    printf("|  init | "); imprimirLinhaVetor(A, n, 1); printf(" |\n");
+    printf("init  | "); imprimirLinhaVetor(A, n, 1); printf("\n");
 
     for (int Prox = 3; Prox <= n; Prox++) {
         A[Prox] = A[A[Prox]] + 1;
-        printf("| %5d | ", Prox);
+        printf("P:%2d  | ", Prox);
         imprimirLinhaVetor(A, n, 1);
-        printf(" |\n");
+        printf("\n");
     }
 }
 
 void TerceiraFase(int A[], int n) {
     int Disp = 1, u = 0, h = 0, Raiz = 2, Prox = 1;
-    printf("\n>>> RASTREAMENTO FASE 3: BITS\n");
-    printf("+------+---+---+------+------+----------------------+\n");
-    printf("| Disp | u | h | Raiz | Prox | Vetor A              |\n");
-    printf("+------+---+---+------+------+----------------------+\n");
+    printf("\n>>> FASE 3: COMPRIMENTOS (RASTREAMENTO COMPLETO)\n");
+    printf("Disp | u | h | Raiz | Prox | Vetor A\n");
+    printf("--------------------------------------------------------------\n");
 
     while (Disp > 0) {
-        while (Raiz <= n && A[Raiz] == h) { u++; Raiz++; }
+        // Registra estado antes de processar o nível h
+        while (Raiz <= n && A[Raiz] == h) { 
+            u++; 
+            Raiz++; 
+        }
+        
         while (Disp > u) {
             A[Prox] = h;
-            Prox++; Disp--;
-            printf("| %4d | %d | %d | %4d | %4d | ", Disp, u, h, Raiz, Prox - 1);
+            printf("%4d | %d | %d | %4d | %4d | ", Disp, u, h, Raiz, Prox);
             imprimirLinhaVetor(A, n, 0);
-            printf(" |\n");
+            printf("\n");
+            
+            Prox++; 
+            Disp--;
         }
-        Disp = 2 * u;
-        h++; u = 0;
-    }
-}
+        
+        // Estado após atribuir folhas no nível h
+        if (u > 0 || Disp == 0) {
+            printf("%4d | %d | %d | %4d | %4d | ", Disp, u, h, Raiz, Prox);
+            imprimirLinhaVetor(A, n, 0);
+            printf(" (Nivel %d concluido)\n", h);
+        }
 
-void CalculaCompCodigo(int A[], int n){
-    PrimeiraFase (A, n);
-    SegundaFase (A, n);
-    TerceiraFase (A, n);
+        Disp = 2 * u;
+        h++;
+        u = 0;
+    }
 }
 
 int compararTokens(const void *a, const void *b) {
